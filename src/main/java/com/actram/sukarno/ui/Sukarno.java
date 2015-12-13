@@ -6,7 +6,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.function.BiConsumer;
 
-import com.actram.sukarno.Config;
+import com.actram.sukarno.config.Config;
 import com.actram.sukarno.ui.interfaces.StageOwner;
 
 import javafx.application.Application;
