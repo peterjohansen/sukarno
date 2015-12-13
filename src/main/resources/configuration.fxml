@@ -24,16 +24,16 @@
             </HBox>
             <HBox spacing="8.0">
                <children>
-                  <Label maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" text="Consonants" HBox.hgrow="NEVER" />
+                  <Label maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" text="Consonants:" HBox.hgrow="NEVER" />
                   <TextField fx:id="consonantsTextField" HBox.hgrow="ALWAYS" />
                </children>
             </HBox>
-            <GridPane hgap="8.0" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" vgap="8.0">
+            <GridPane hgap="8.0" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" vgap="8.0">
               <columnConstraints>
                 <ColumnConstraints hgrow="NEVER" />
-                <ColumnConstraints hgrow="SOMETIMES" />
+                <ColumnConstraints hgrow="ALWAYS" />
                   <ColumnConstraints hgrow="NEVER" />
-                  <ColumnConstraints hgrow="SOMETIMES" />
+                  <ColumnConstraints hgrow="ALWAYS" />
               </columnConstraints>
               <rowConstraints>
                 <RowConstraints vgrow="NEVER" />
@@ -53,18 +53,19 @@
                   <Label alignment="CENTER_RIGHT" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" text="Seven:" GridPane.columnIndex="2" GridPane.rowIndex="3" />
                   <Label alignment="CENTER_RIGHT" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" text="Eight:" GridPane.rowIndex="4" />
                   <Label alignment="CENTER_RIGHT" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" text="Nine:" GridPane.columnIndex="2" GridPane.rowIndex="4" />
-                  <TextField fx:id="zeroTextField" prefColumnCount="8" GridPane.columnIndex="1" />
-                  <TextField fx:id="oneTextField" prefColumnCount="8" GridPane.columnIndex="3" />
-                  <TextField fx:id="twoTextField" prefColumnCount="8" GridPane.columnIndex="1" GridPane.rowIndex="1" />
-                  <TextField fx:id="threeTextField" prefColumnCount="8" GridPane.columnIndex="3" GridPane.rowIndex="1" />
-                  <TextField fx:id="fourTextField" prefColumnCount="8" GridPane.columnIndex="1" GridPane.rowIndex="2" />
-                  <TextField fx:id="fiveTextField" prefColumnCount="8" GridPane.columnIndex="3" GridPane.rowIndex="2" />
-                  <TextField fx:id="sixTextField" prefColumnCount="8" GridPane.columnIndex="1" GridPane.rowIndex="3" />
-                  <TextField fx:id="sevenTextField" prefColumnCount="8" GridPane.columnIndex="3" GridPane.rowIndex="3" />
-                  <TextField fx:id="eightTextField" prefColumnCount="8" GridPane.columnIndex="1" GridPane.rowIndex="4" />
-                  <TextField fx:id="nineTextField" prefColumnCount="8" GridPane.columnIndex="3" GridPane.rowIndex="4" />
+                  <TextField fx:id="zeroTextField" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" prefColumnCount="8" GridPane.columnIndex="1" />
+                  <TextField fx:id="oneTextField" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" prefColumnCount="8" GridPane.columnIndex="3" />
+                  <TextField fx:id="twoTextField" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" prefColumnCount="8" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                  <TextField fx:id="threeTextField" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" prefColumnCount="8" GridPane.columnIndex="3" GridPane.rowIndex="1" />
+                  <TextField fx:id="fourTextField" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" prefColumnCount="8" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+                  <TextField fx:id="fiveTextField" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" prefColumnCount="8" GridPane.columnIndex="3" GridPane.rowIndex="2" />
+                  <TextField fx:id="sixTextField" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" prefColumnCount="8" GridPane.columnIndex="1" GridPane.rowIndex="3" />
+                  <TextField fx:id="sevenTextField" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" prefColumnCount="8" GridPane.columnIndex="3" GridPane.rowIndex="3" />
+                  <TextField fx:id="eightTextField" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" prefColumnCount="8" GridPane.columnIndex="1" GridPane.rowIndex="4" />
+                  <TextField fx:id="nineTextField" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" prefColumnCount="8" GridPane.columnIndex="3" GridPane.rowIndex="4" />
                </children>
             </GridPane>
+            <Label fx:id="digitErrorLabel" alignment="CENTER_RIGHT" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" text="Number-character error feedback" textFill="#ff4040" VBox.vgrow="NEVER" />
          </children>
          <padding>
             <Insets bottom="8.0" left="8.0" right="8.0" top="8.0" />

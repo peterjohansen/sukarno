@@ -104,7 +104,7 @@ public class Sukarno extends Application {
 		});
 
 		primaryStage.show();
-		primaryStage.setMaxWidth(primaryStage.getWidth());
+		primaryStage.setMinWidth(primaryStage.getWidth());
 		primaryStage.setMinHeight(primaryStage.getHeight());
 	}
 }

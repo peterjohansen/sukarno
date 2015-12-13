@@ -17,12 +17,12 @@ import javafx.stage.Stage;
  * @author Peter André Johansen
  */
 public class SearchController implements StageOwner {
+	private Sukarno program;
+	private Stage stage;
+
 	@FXML private TextField numberInputField;
 	@FXML private ListView<String> resultList;
 	@FXML private Label statusLabel;
-
-	private Sukarno program;
-	private Stage stage;
 
 	@Override
 	public Stage getStage() {

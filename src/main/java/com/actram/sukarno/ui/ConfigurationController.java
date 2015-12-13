@@ -3,6 +3,7 @@ package com.actram.sukarno.ui;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 
 import com.actram.sukarno.config.BadConfigValueException;
 import com.actram.sukarno.config.Config;
@@ -10,9 +11,13 @@ import com.actram.sukarno.config.Type;
 import com.actram.sukarno.ui.interfaces.ModalOwner;
 import com.actram.sukarno.ui.interfaces.StageOwner;
 
+import javafx.application.Platform;
+import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
+import javafx.scene.control.Tooltip;
 import javafx.stage.Stage;
 
 /**
@@ -21,6 +26,9 @@ import javafx.stage.Stage;
  * @author Peter André Johansen
  */
 public class ConfigurationController implements StageOwner, ModalOwner {
+	private Sukarno program;
+	private Stage stage;
+
 	@FXML private TextField vowelTextField;
 	@FXML private TextField consonantsTextField;
 	@FXML private TextField zeroTextField;
@@ -33,9 +41,9 @@ public class ConfigurationController implements StageOwner, ModalOwner {
 	@FXML private TextField sevenTextField;
 	@FXML private TextField eightTextField;
 	@FXML private TextField nineTextField;
+	@FXML private Label digitErrorLabel;
 
-	private Sukarno program;
-	private Stage stage;
+	private final Map<Type, TextField> textConfigMap = new HashMap<>();
 
 	private final Config tempConfig = new Config();
 
@@ -61,7 +69,6 @@ public class ConfigurationController implements StageOwner, ModalOwner {
 
 	@FXML
 	void initialize() {
-		Map<Type, TextField> textConfigMap = new HashMap<>();
 		textConfigMap.put(Type.VOWELS, vowelTextField);
 		textConfigMap.put(Type.CONSONANTS, consonantsTextField);
 		textConfigMap.put(Type.ZERO_CHARACTERS, zeroTextField);
@@ -75,32 +82,49 @@ public class ConfigurationController implements StageOwner, ModalOwner {
 		textConfigMap.put(Type.EIGHT_CHARACTERS, eightTextField);
 		textConfigMap.put(Type.NINE_CHARACTERS, nineTextField);
 
+		digitErrorLabel.setText(null);
+
 		// Update config on text field change
 		textConfigMap.forEach((type, textField) -> {
 			textField.textProperty().addListener((observable, oldValue, newValue) -> {
 				try {
-					tempConfig.set(type, newValue);
+					tempConfig.set(type, Config.toCharacterSet(newValue));
 				} catch (BadConfigValueException e) {
-					textField.setText(oldValue);
+					digitErrorLabel.setText("Invalid value! Hover to see.");
+					digitErrorLabel.setTooltip(new Tooltip("Error message: " + e.getMessage()));
+					new Thread(new Task<Void>() {
+						@Override
+						protected Void call() throws Exception {
+							try {
+								Thread.sleep(5000);
+							} catch (Exception e2) {} finally {
+								Platform.runLater(() -> {
+									digitErrorLabel.setText(null);
+								});
+							}
+							return null;
+						}
+					}).start();
 				}
+				updateConfigTextFields();
 			});
 		});
 
 		tempConfig.addListener((type, oldValue, newValue) -> {
-
-			// Update text field on config change
-			if (textConfigMap.containsKey(type)) {
-				textConfigMap.get(type).setText(newValue.toString());
-			}
-
+			updateConfigTextFields();
 		});
 
 		tempConfig.forceListenerUpdate();
+
 	}
 
 	@Override
 	public void saveStage() {
-		program.getConfig().setTo(tempConfig);
+		try {
+			program.getConfig().setTo(tempConfig);
+		} catch (BadConfigValueException e) {
+			e.printStackTrace();
+		}
 		stage.hide();
 	}
 
@@ -115,8 +139,20 @@ public class ConfigurationController implements StageOwner, ModalOwner {
 	@Override
 	public void showStage() {
 		tempConfig.setTo(program.getConfig());
+
 		stage.show();
-		stage.setMaxWidth(stage.getWidth());
-		stage.setMaxHeight(stage.getHeight());
+		stage.setMinWidth(stage.getWidth());
+		stage.setMinHeight(stage.getHeight());
+	}
+
+	private void updateConfigTextFields() {
+		textConfigMap.forEach((type, textField) -> {
+			Set<Character> chars = tempConfig.get(type);
+			StringBuilder builder = new StringBuilder(chars.size());
+			chars.forEach(character -> {
+				builder.append(character);
+			});
+			textField.setText(builder.toString());
+		});
 	}
 }
