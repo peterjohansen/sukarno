@@ -5,19 +5,23 @@
 <?import java.lang.*?>
 <?import javafx.scene.layout.*?>
 
-<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="480.0" prefWidth="360.0" xmlns="http://javafx.com/javafx/8.0.40" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.actram.sukarno.ui.SearchController">
+<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" xmlns="http://javafx.com/javafx/8.0.40" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.actram.sukarno.ui.SearchController">
    <center>
-      <ListView fx:id="resultList" focusTraversable="false" BorderPane.alignment="CENTER">
+      <ListView fx:id="resultList" focusTraversable="false" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" prefHeight="300.0" prefWidth="360.0" BorderPane.alignment="CENTER">
          <BorderPane.margin>
             <Insets bottom="8.0" top="8.0" />
          </BorderPane.margin></ListView>
    </center>
    <top>
-      <TextField fx:id="numberInputField" BorderPane.alignment="CENTER">
+      <HBox fillHeight="false" spacing="8.0" BorderPane.alignment="CENTER">
          <BorderPane.margin>
             <Insets />
          </BorderPane.margin>
-      </TextField>
+         <children>
+            <Label alignment="CENTER_RIGHT" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" prefWidth="64.0" text="Number to memorize:" textAlignment="RIGHT" wrapText="true" />
+            <TextArea fx:id="numberInputField" prefColumnCount="24" prefRowCount="1" wrapText="true" HBox.hgrow="ALWAYS" />
+         </children>
+      </HBox>
    </top>
    <padding>
       <Insets bottom="8.0" left="8.0" right="8.0" top="8.0" />
@@ -27,8 +31,14 @@
          <right>
             <Button mnemonicParsing="false" onAction="#showConfiguration" text="Configure" BorderPane.alignment="CENTER" />
          </right>
+         <center>
+            <Label fx:id="statusLabel" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" text="Result count label" BorderPane.alignment="CENTER">
+               <BorderPane.margin>
+                  <Insets left="8.0" right="8.0" />
+               </BorderPane.margin></Label>
+         </center>
          <left>
-            <Label fx:id="statusLabel" text="Information label" BorderPane.alignment="CENTER" />
+            <ProgressIndicator fx:id="searchProgressIndicator" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" prefHeight="16.0" prefWidth="16.0" BorderPane.alignment="CENTER" />
          </left>
       </BorderPane>
    </bottom>

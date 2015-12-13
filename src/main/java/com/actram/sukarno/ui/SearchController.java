@@ -8,7 +8,8 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
-import javafx.scene.control.TextField;
+import javafx.scene.control.ProgressIndicator;
+import javafx.scene.control.TextArea;
 import javafx.stage.Stage;
 
 /**
@@ -20,13 +21,25 @@ public class SearchController implements StageOwner {
 	private Sukarno program;
 	private Stage stage;
 
-	@FXML private TextField numberInputField;
+	@FXML private TextArea numberInputField;
+	@FXML private ProgressIndicator searchProgressIndicator;
 	@FXML private ListView<String> resultList;
 	@FXML private Label statusLabel;
 
 	@Override
 	public Stage getStage() {
 		return stage;
+	}
+
+	@FXML
+	void initialize() {
+		numberInputField.textProperty().addListener((observable, oldValue, newValue) -> {
+			if (!newValue.matches("\\d*") && !newValue.equals(oldValue)) {
+				numberInputField.setText(oldValue);
+			}
+		});
+
+		searchProgressIndicator.setManaged(false);
 	}
 
 	@Override

@@ -62,9 +62,19 @@ public class ConfigurationController implements StageOwner, ModalOwner {
 		cancelStage();
 	}
 
+	@FXML
+	void exportConfiguration(ActionEvent evt) {
+
+	}
+
 	@Override
 	public Stage getStage() {
 		return stage;
+	}
+
+	@FXML
+	void importConfiguration(ActionEvent evt) {
+
 	}
 
 	@FXML
@@ -90,7 +100,7 @@ public class ConfigurationController implements StageOwner, ModalOwner {
 				try {
 					tempConfig.set(type, Config.toCharacterSet(newValue));
 				} catch (BadConfigValueException e) {
-					digitErrorLabel.setText("Invalid value! Hover to see.");
+					digitErrorLabel.setText("Invalid value! Hover to view.");
 					digitErrorLabel.setTooltip(new Tooltip("Error message: " + e.getMessage()));
 					new Thread(new Task<Void>() {
 						@Override

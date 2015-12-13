@@ -13,6 +13,7 @@ import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.image.Image;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 
@@ -47,6 +48,7 @@ public class Sukarno extends Application {
 		Objects.requireNonNull(object, "object cannot be null");
 		Objects.requireNonNull(stage, "stage cannot be null");
 
+		stage.getIcons().add(new Image("icon.png"));
 		((StageOwner) object).setStage(this, stage);
 		return (T) object;
 	}
