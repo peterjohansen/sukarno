@@ -8,21 +8,33 @@ import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 
+import com.actram.sukarno.config.Config;
+
 /**
  *
  *
  * @author Peter André Johansen
  */
 public class Word {
-	public static Set<Word> loadAll(String consonantDefinition, String fileName) throws IOException {
+	public static Set<Word> loadAll(Config config, String fileName) throws IOException {
+		Objects.requireNonNull(config, "config cannot be null");
 		Objects.requireNonNull(fileName, "file name cannot be null");
+
+		StringBuilder consonants = new StringBuilder();
+		config.forEachDigitCharacterMap(type -> {
+			Set<Character> chars = config.get(type);
+			for (Character character : chars) {
+				consonants.append(character);
+			}
+		});
+
 		Set<Word> words = new HashSet<>();
 		InputStream is = Word.class.getResourceAsStream(fileName);
 		InputStreamReader isr = new InputStreamReader(is);
 		BufferedReader br = new BufferedReader(isr);
 		String line = null;
 		while ((line = br.readLine()) != null) {
-			words.add(new Word(consonantDefinition, line));
+			words.add(new Word(consonants.toString(), line));
 		}
 		br.close();
 		return words;
@@ -44,6 +56,10 @@ public class Word {
 			}
 		}
 		this.consonants = builder.toString();
+	}
+
+	public int consonantLength() {
+		return consonants.length();
 	}
 
 	@Override
@@ -76,5 +92,14 @@ public class Word {
 		result = prime * result + ((consonants == null) ? 0 : consonants.hashCode());
 		result = prime * result + ((content == null) ? 0 : content.hashCode());
 		return result;
+	}
+	
+	public int length() {
+		return content.length();
+	}
+
+	@Override
+	public String toString() {
+		return content;
 	}
 }

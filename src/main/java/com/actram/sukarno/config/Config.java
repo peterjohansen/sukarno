@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.function.Consumer;
 
 /**
  *
@@ -53,32 +54,38 @@ public class Config {
 		}
 	}
 
-	public <T> T get(Type type) {
-		Objects.requireNonNull(type, "type cannot be null");
-		return cast(data.get(type));
-	}
-
-	private void manualValidate(Type type, Object value) {
-		Type[] digitChars = new Type[9];
-		for (int i = 0; i < digitChars.length; i++) {
+	public void forEachDigitCharacterMap(Consumer<Type> consumer) {
+		Objects.requireNonNull(consumer, "consumer cannot be null");
+		Type[] digitCharsTypes = new Type[10];
+		for (int i = 0; i < digitCharsTypes.length; i++) {
 			if (Type.values()[i].ordinal() < Type.ZERO_CHARACTERS.ordinal()) {
 				continue;
 			}
 			if (Type.values()[i].ordinal() > Type.NINE_CHARACTERS.ordinal()) {
 				continue;
 			}
-			digitChars[i] = Type.values()[i];
+			digitCharsTypes[i] = Type.values()[i];
 		}
+		for (Type digitCharsType : digitCharsTypes) {
+			consumer.accept(digitCharsType);
+		}
+	}
 
+	public <T> T get(Type type) {
+		Objects.requireNonNull(type, "type cannot be null");
+		return cast(data.get(type));
+	}
+
+	private void manualValidate(Type type, Object value) {
 		Set<Character> s1 = cast(value);
-		for (Type digitCharsType : digitChars) {
-			if (type != digitCharsType) {
-				Set<Character> s2 = get(digitCharsType);
+		forEachDigitCharacterMap(otherType -> {
+			if (type != otherType) {
+				Set<Character> s2 = get(otherType);
 				if (!Collections.disjoint(s1, s2)) {
 					throw new BadConfigValueException("number-character values cannot be share characters");
 				}
 			}
-		}
+		});
 	}
 
 	public void removeListener(ConfigListener listener) {
