@@ -6,7 +6,6 @@
 <?import java.lang.*?>
 <?import javafx.scene.layout.*?>
 
-
 <BorderPane prefWidth="384.0" xmlns="http://javafx.com/javafx/8.0.40" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.actram.sukarno.ui.ConfigurationController">
    <center>
       <VBox maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" spacing="12.0">
@@ -16,18 +15,6 @@
                   <Font size="18.0" />
                </font>
             </Label>
-            <HBox spacing="8.0">
-               <children>
-                  <Label maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" text="Vowels:" HBox.hgrow="NEVER" />
-                  <TextField fx:id="vowelTextField" HBox.hgrow="ALWAYS" />
-               </children>
-            </HBox>
-            <HBox spacing="8.0">
-               <children>
-                  <Label maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" text="Consonants:" HBox.hgrow="NEVER" />
-                  <TextField fx:id="consonantsTextField" HBox.hgrow="ALWAYS" />
-               </children>
-            </HBox>
             <GridPane hgap="8.0" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" vgap="8.0">
               <columnConstraints>
                 <ColumnConstraints hgrow="NEVER" />

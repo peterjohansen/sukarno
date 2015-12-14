@@ -29,16 +29,23 @@
    <bottom>
       <BorderPane BorderPane.alignment="CENTER">
          <right>
-            <Button mnemonicParsing="false" onAction="#showConfiguration" text="Configure" BorderPane.alignment="CENTER" />
+            <Button mnemonicParsing="false" onAction="#showConfiguration" text="Configure" BorderPane.alignment="CENTER">
+               <BorderPane.margin>
+                  <Insets left="8.0" />
+               </BorderPane.margin></Button>
          </right>
          <center>
             <Label fx:id="statusLabel" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" text="Result count label" BorderPane.alignment="CENTER">
                <BorderPane.margin>
-                  <Insets left="8.0" right="8.0" />
+                  <Insets />
                </BorderPane.margin></Label>
          </center>
          <left>
-            <ProgressIndicator fx:id="searchProgressIndicator" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" prefHeight="16.0" prefWidth="16.0" BorderPane.alignment="CENTER" />
+            <ProgressIndicator fx:id="searchProgressIndicator" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" prefHeight="16.0" prefWidth="16.0" BorderPane.alignment="CENTER">
+               <BorderPane.margin>
+                  <Insets right="8.0" />
+               </BorderPane.margin>
+            </ProgressIndicator>
          </left>
       </BorderPane>
    </bottom>

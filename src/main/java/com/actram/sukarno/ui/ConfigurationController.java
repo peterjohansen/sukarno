@@ -29,8 +29,6 @@ public class ConfigurationController implements StageOwner, ModalOwner {
 	private Sukarno program;
 	private Stage stage;
 
-	@FXML private TextField vowelTextField;
-	@FXML private TextField consonantsTextField;
 	@FXML private TextField zeroTextField;
 	@FXML private TextField oneTextField;
 	@FXML private TextField twoTextField;
@@ -79,8 +77,6 @@ public class ConfigurationController implements StageOwner, ModalOwner {
 
 	@FXML
 	void initialize() {
-		textConfigMap.put(Type.VOWELS, vowelTextField);
-		textConfigMap.put(Type.CONSONANTS, consonantsTextField);
 		textConfigMap.put(Type.ZERO_CHARACTERS, zeroTextField);
 		textConfigMap.put(Type.ONE_CHARACTERS, oneTextField);
 		textConfigMap.put(Type.TWO_CHARACTERS, twoTextField);

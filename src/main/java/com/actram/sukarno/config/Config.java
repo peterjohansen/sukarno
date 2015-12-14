@@ -38,6 +38,10 @@ public class Config {
 		reset();
 	}
 
+	public Config(Config config) {
+		setTo(config);
+	}
+
 	public void addListener(ConfigListener listener) {
 		Objects.requireNonNull(listener, "change listener cannot be null");
 		this.listeners.add(listener);
@@ -55,11 +59,24 @@ public class Config {
 	}
 
 	private void manualValidate(Type type, Object value) {
-		if (type == Type.VOWELS || type == Type.CONSONANTS) {
-			Set<?> s1 = (Set<?>) value;
-			Set<?> s2 = (type == Type.VOWELS ? get(Type.CONSONANTS) : get(Type.VOWELS));
-			if (!Collections.disjoint(s1, s2)) {
-				throw new BadConfigValueException("vowels and consonants cannot share characters");
+		Type[] digitChars = new Type[9];
+		for (int i = 0; i < digitChars.length; i++) {
+			if (Type.values()[i].ordinal() < Type.ZERO_CHARACTERS.ordinal()) {
+				continue;
+			}
+			if (Type.values()[i].ordinal() > Type.NINE_CHARACTERS.ordinal()) {
+				continue;
+			}
+			digitChars[i] = Type.values()[i];
+		}
+
+		Set<Character> s1 = cast(value);
+		for (Type digitCharsType : digitChars) {
+			if (type != digitCharsType) {
+				Set<Character> s2 = get(digitCharsType);
+				if (!Collections.disjoint(s1, s2)) {
+					throw new BadConfigValueException("number-character values cannot be share characters");
+				}
 			}
 		}
 	}
@@ -70,8 +87,6 @@ public class Config {
 	}
 
 	public void reset() {
-		uncheckedSet(Type.VOWELS, toCharacterSet("aehiouxy"));
-		uncheckedSet(Type.CONSONANTS, toCharacterSet("bcdfgjklmnpqrstvwz"));
 		uncheckedSet(Type.ZERO_CHARACTERS, toCharacterSet("csz"));
 		uncheckedSet(Type.ONE_CHARACTERS, toCharacterSet("t"));
 		uncheckedSet(Type.TWO_CHARACTERS, toCharacterSet("n"));

@@ -12,8 +12,6 @@ import java.util.function.BiFunction;
  */
 public enum Type {
 	// @formatterOff
-	VOWELS(Set.class, (data, value) -> ((Set<?>) value).isEmpty() ? "vowels cannot be empty" : null),
-	CONSONANTS(Set.class, (data, value) -> ((Set<?>) value).isEmpty() ? "consonants cannot be empty" : null),
 	ZERO_CHARACTERS(Set.class, (data, value) -> ((Set<?>) value).isEmpty() ? "zero characters cannot be empty" : null),
 	ONE_CHARACTERS(Set.class, (data, value) -> ((Set<?>) value).isEmpty() ? "one characters cannot be empty" : null),
 	TWO_CHARACTERS(Set.class, (data, value) -> ((Set<?>) value).isEmpty() ? "two characters cannot be empty" : null),
