@@ -58,6 +58,7 @@ public class MajorSystemSearcher {
 			if (validChars.contains(consonant)) {
 				points++;
 			} else {
+				points = 0;
 				break;
 			}
 		}
