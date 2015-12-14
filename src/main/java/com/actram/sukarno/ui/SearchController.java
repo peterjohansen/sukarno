@@ -2,11 +2,12 @@ package com.actram.sukarno.ui;
 
 import java.io.IOException;
 import java.util.Collections;
+import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 
 import com.actram.sukarno.MajorSystemSearcher;
-import com.actram.sukarno.RatedWord;
+import com.actram.sukarno.RatedResult;
 import com.actram.sukarno.Word;
 import com.actram.sukarno.ui.interfaces.StageOwner;
 
@@ -36,7 +37,7 @@ public class SearchController implements StageOwner {
 
 	@FXML private TextArea numberInputField;
 	@FXML private ProgressIndicator searchProgressIndicator;
-	@FXML private ListView<RatedWord> resultList;
+	@FXML private ListView<RatedResult> resultList;
 	@FXML private Label statusLabel;
 
 	private MajorSystemSearcher searcher;
@@ -79,15 +80,15 @@ public class SearchController implements StageOwner {
 			}
 		});
 
-		resultList.setCellFactory(new Callback<ListView<RatedWord>, ListCell<RatedWord>>() {
+		resultList.setCellFactory(new Callback<ListView<RatedResult>, ListCell<RatedResult>>() {
 			@Override
-			public ListCell<RatedWord> call(ListView<RatedWord> param) {
-				return new ListCell<RatedWord>() {
+			public ListCell<RatedResult> call(ListView<RatedResult> param) {
+				return new ListCell<RatedResult>() {
 					@Override
-					protected void updateItem(RatedWord item, boolean empty) {
+					protected void updateItem(RatedResult item, boolean empty) {
 						super.updateItem(item, empty);
 						if (item != null) {
-							setText(item.getWord() + " - " + item.getPoints());
+							setText(item.toString());
 						}
 					}
 				};
@@ -99,7 +100,7 @@ public class SearchController implements StageOwner {
 		searchProgressIndicator.setManaged(false);
 		searchProgressIndicator.setVisible(false);
 
-		numberInputField.setText("40491821");
+		numberInputField.setText("494284312");
 	}
 
 	@Override
@@ -129,14 +130,12 @@ public class SearchController implements StageOwner {
 			@Override
 			protected Void call() throws Exception {
 				while (searcher != null && !searcher.isDone()) {
-					final RatedWord result = searcher.nextResult();
-					if (result != null) {
-						Platform.runLater(() -> {
-							resultList.getItems().add(result);
-							Collections.sort(resultList.getItems());
-							statusLabel.setText(resultList.getItems().size() + " results");
-						});
-					}
+					List<RatedResult> results = searcher.nextPass();
+					Platform.runLater(() -> {
+						resultList.getItems().setAll(results);
+						Collections.sort(resultList.getItems());
+						statusLabel.setText(resultList.getItems().size() + " results");
+					});
 				}
 				return null;
 			}

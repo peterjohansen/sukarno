@@ -9,30 +9,23 @@ import java.util.Objects;
  */
 public class RatedWord implements Comparable<RatedWord> {
 	private final Word word;
-
 	private final int points;
+	private final int consonantMatches;
 
-	public RatedWord(Word word, int points) {
+	public RatedWord(Word word, int points, int consonantMatches) {
 		Objects.requireNonNull(word, "word cannot be null");
 		this.word = word;
 		this.points = points;
+		this.consonantMatches = consonantMatches;
 	}
+
 	@Override
 	public int compareTo(RatedWord other) {
 		return (other.points - points);
 	}
 
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj) return true;
-		if (obj == null) return false;
-		if (getClass() != obj.getClass()) return false;
-		RatedWord other = (RatedWord) obj;
-		if (points != other.points) return false;
-		if (word == null) {
-			if (other.word != null) return false;
-		} else if (!word.equals(other.word)) return false;
-		return true;
+	public int getConsonantMatches() {
+		return consonantMatches;
 	}
 
 	public int getPoints() {
@@ -44,11 +37,7 @@ public class RatedWord implements Comparable<RatedWord> {
 	}
 
 	@Override
-	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + points;
-		result = prime * result + ((word == null) ? 0 : word.hashCode());
-		return result;
+	public String toString() {
+		return word.toString();
 	}
 }

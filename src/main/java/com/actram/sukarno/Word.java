@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
@@ -39,7 +40,7 @@ public class Word {
 			words.add(new Word(consonants.toString(), line));
 		}
 		br.close();
-		return words;
+		return Collections.unmodifiableSet(words);
 	}
 
 	private final String content;
