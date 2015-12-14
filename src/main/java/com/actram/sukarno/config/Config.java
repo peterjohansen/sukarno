@@ -3,12 +3,12 @@ package com.actram.sukarno.config;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
-import java.util.function.Consumer;
+import java.util.concurrent.ConcurrentSkipListSet;
+import java.util.function.BiConsumer;
 
 /**
  *
@@ -24,7 +24,7 @@ public class Config {
 
 	public static Set<Character> toCharacterSet(String str) {
 		Objects.requireNonNull(str, "string cannot be null");
-		Set<Character> chars = new HashSet<>();
+		Set<Character> chars = new ConcurrentSkipListSet<>();
 		for (int i = 0; i < str.length(); i++) {
 			chars.add(str.charAt(i));
 		}
@@ -54,8 +54,22 @@ public class Config {
 		}
 	}
 
-	public void forEachDigitCharacterMap(Consumer<Type> consumer) {
+	public void forEachDigitCharacterMap(BiConsumer<Type, Object> consumer) {
 		Objects.requireNonNull(consumer, "consumer cannot be null");
+		Type[] digitCharsTypes = getDigitCharactersTypes();
+		for (Type digitCharsType : digitCharsTypes) {
+			consumer.accept(digitCharsType, get(digitCharsType));
+		}
+	}
+
+	public <T> T get(Type type) {
+		Objects.requireNonNull(type, "type cannot be null");
+		synchronized (data) {
+			return cast(data.get(type));
+		}
+	}
+
+	public Type[] getDigitCharactersTypes() {
 		Type[] digitCharsTypes = new Type[10];
 		for (int i = 0; i < digitCharsTypes.length; i++) {
 			if (Type.values()[i].ordinal() < Type.ZERO_CHARACTERS.ordinal()) {
@@ -66,22 +80,13 @@ public class Config {
 			}
 			digitCharsTypes[i] = Type.values()[i];
 		}
-		for (Type digitCharsType : digitCharsTypes) {
-			consumer.accept(digitCharsType);
-		}
-	}
-
-	public <T> T get(Type type) {
-		Objects.requireNonNull(type, "type cannot be null");
-		return cast(data.get(type));
+		return digitCharsTypes;
 	}
 
 	private void manualValidate(Type type, Object value) {
-		Set<Character> s1 = cast(value);
-		forEachDigitCharacterMap(otherType -> {
+		forEachDigitCharacterMap((otherType, otherValue) -> {
 			if (type != otherType) {
-				Set<Character> s2 = get(otherType);
-				if (!Collections.disjoint(s1, s2)) {
+				if (!Collections.disjoint(cast(value), cast(otherValue))) {
 					throw new BadConfigValueException("number-character values cannot be share characters");
 				}
 			}
@@ -116,10 +121,7 @@ public class Config {
 	public void setTo(Config config) {
 		Objects.requireNonNull(config, "config cannot be null");
 		for (Type type : data.keySet()) {
-			if (!get(type).equals(config.get(type))) {
-				listeners.forEach(listener -> listener.configUpdated(type, config.get(type), get(type)));
-				config.uncheckedSet(type, get(type));
-			}
+			uncheckedSet(type, config.get(type));
 		}
 	}
 

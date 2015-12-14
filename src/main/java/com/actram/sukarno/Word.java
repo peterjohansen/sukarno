@@ -4,7 +4,9 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 
@@ -21,8 +23,8 @@ public class Word {
 		Objects.requireNonNull(fileName, "file name cannot be null");
 
 		StringBuilder consonants = new StringBuilder();
-		config.forEachDigitCharacterMap(type -> {
-			Set<Character> chars = config.get(type);
+		config.forEachDigitCharacterMap((type, value) -> {
+			Set<Character> chars = Config.cast(value);
 			for (Character character : chars) {
 				consonants.append(character);
 			}
@@ -41,25 +43,24 @@ public class Word {
 	}
 
 	private final String content;
-
-	private final String consonants;
+	private final Character[] consonants;
 
 	public Word(String consonantDefinition, String content) {
 		Objects.requireNonNull(consonantDefinition, "consonant definition string cannot be null");
 		Objects.requireNonNull(content, "content cannot be null");
 		this.content = content;
-		StringBuilder builder = new StringBuilder(content.length());
+		List<Character> consonantList = new ArrayList<>();
 		for (int i = 0; i < content.length(); i++) {
 			final char character = content.charAt(i);
 			if (consonantDefinition.indexOf(character) != -1) {
-				builder.append(character);
+				consonantList.add(character);
 			}
 		}
-		this.consonants = builder.toString();
+		this.consonants = consonantList.toArray(new Character[consonantList.size()]);
 	}
 
 	public int consonantLength() {
-		return consonants.length();
+		return consonants.length;
 	}
 
 	@Override
@@ -77,8 +78,8 @@ public class Word {
 		return true;
 	}
 
-	public String getConsonants() {
-		return consonants;
+	public char getConsonant(int index) {
+		return consonants[index];
 	}
 
 	public String getContent() {
@@ -93,7 +94,11 @@ public class Word {
 		result = prime * result + ((content == null) ? 0 : content.hashCode());
 		return result;
 	}
-	
+
+	public boolean isConsonantIndex(int index) {
+		return (index >= 0 && index <= consonantLength() - 1);
+	}
+
 	public int length() {
 		return content.length();
 	}

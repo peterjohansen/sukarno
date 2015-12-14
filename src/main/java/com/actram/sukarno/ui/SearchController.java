@@ -1,10 +1,12 @@
 package com.actram.sukarno.ui;
 
 import java.io.IOException;
+import java.util.Collections;
 import java.util.Objects;
 import java.util.Set;
 
 import com.actram.sukarno.MajorSystemSearcher;
+import com.actram.sukarno.RatedWord;
 import com.actram.sukarno.Word;
 import com.actram.sukarno.ui.interfaces.StageOwner;
 
@@ -15,11 +17,13 @@ import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.scene.control.Label;
+import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
 import javafx.scene.control.ProgressIndicator;
 import javafx.scene.control.TextArea;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
+import javafx.util.Callback;
 
 /**
  * 
@@ -32,10 +36,10 @@ public class SearchController implements StageOwner {
 
 	@FXML private TextArea numberInputField;
 	@FXML private ProgressIndicator searchProgressIndicator;
-	@FXML private ListView<String> resultList;
+	@FXML private ListView<RatedWord> resultList;
 	@FXML private Label statusLabel;
 
-	private MajorSystemSearcher majorSystemSearcher;
+	private MajorSystemSearcher searcher;
 	private Set<Word> words;
 	private Task<Void> searchTask;
 
@@ -43,6 +47,9 @@ public class SearchController implements StageOwner {
 		if (searchTask != null && searchTask.isRunning()) {
 			searchTask.cancel();
 		}
+		searcher = null;
+		searchProgressIndicator.setManaged(false);
+		searchProgressIndicator.setVisible(false);
 	}
 
 	@Override
@@ -54,15 +61,45 @@ public class SearchController implements StageOwner {
 	void initialize() {
 		this.program = Sukarno.instance;
 
+		try {
+			this.words = Word.loadAll(program.getConfig(), "/words.txt");
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+
 		numberInputField.textProperty().addListener((observable, oldValue, newValue) -> {
 			if (!newValue.matches("\\d*") && !newValue.equals(oldValue)) {
 				numberInputField.setText(oldValue);
 			} else if (!newValue.isEmpty()) {
-				startSearch();
+				cancelSearch();
+				startSearch(newValue);
+			} else {
+				cancelSearch();
+				resultList.getItems().clear();
 			}
 		});
 
+		resultList.setCellFactory(new Callback<ListView<RatedWord>, ListCell<RatedWord>>() {
+			@Override
+			public ListCell<RatedWord> call(ListView<RatedWord> param) {
+				return new ListCell<RatedWord>() {
+					@Override
+					protected void updateItem(RatedWord item, boolean empty) {
+						super.updateItem(item, empty);
+						if (item != null) {
+							setText(item.getWord() + " - " + item.getPoints());
+						}
+					}
+				};
+			}
+		});
+
+		statusLabel.setManaged(false);
+		statusLabel.setVisible(false);
 		searchProgressIndicator.setManaged(false);
+		searchProgressIndicator.setVisible(false);
+
+		numberInputField.setText("40491821");
 	}
 
 	@Override
@@ -82,37 +119,38 @@ public class SearchController implements StageOwner {
 		program.getController(ConfigurationController.class).showStage();
 	}
 
-	private void startSearch() {
-		cancelSearch();
-		if (words == null) {
-			try {
-				words = Word.loadAll(program.getConfig(), "/words.txt");
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-			this.majorSystemSearcher = new MajorSystemSearcher(program.getConfig(), words);
+	private void startSearch(String number) {
+		if (searcher != null) {
+			return;
 		}
+		this.searcher = new MajorSystemSearcher(words, program.getConfig(), numberInputField.getText());
+
 		Task<Void> searchTask = new Task<Void>() {
 			@Override
 			protected Void call() throws Exception {
-				majorSystemSearcher.findResults(result -> {
-					Platform.runLater(() -> {
-						resultList.getItems().add(result);
-						statusLabel.setText(resultList.getItems().size() + " results");
-					});
-				});
+				while (searcher != null && !searcher.isDone()) {
+					final RatedWord result = searcher.nextResult();
+					if (result != null) {
+						Platform.runLater(() -> {
+							resultList.getItems().add(result);
+							Collections.sort(resultList.getItems());
+							statusLabel.setText(resultList.getItems().size() + " results");
+						});
+					}
+				}
 				return null;
 			}
 		};
 		EventHandler<WorkerStateEvent> searchDone = event -> {
-			searchProgressIndicator.setManaged(false);
-			searchProgressIndicator.setVisible(false);
+			cancelSearch();
 		};
 		searchTask.addEventHandler(WorkerStateEvent.WORKER_STATE_CANCELLED, searchDone);
 		searchTask.addEventHandler(WorkerStateEvent.WORKER_STATE_SUCCEEDED, searchDone);
 
 		resultList.getItems().clear();
 		new Thread(searchTask).start();
+		statusLabel.setManaged(true);
+		statusLabel.setVisible(true);
 		searchProgressIndicator.setManaged(true);
 		searchProgressIndicator.setVisible(true);
 	}

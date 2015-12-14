@@ -1,14 +1,15 @@
 package com.actram.sukarno;
 
-import java.util.Collections;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
-import java.util.function.Consumer;
 
 import com.actram.sukarno.config.Config;
+import com.actram.sukarno.config.Type;
 
 /**
  * 
@@ -16,29 +17,61 @@ import com.actram.sukarno.config.Config;
  * @author Peter André Johansen
  */
 public class MajorSystemSearcher {
-	private final Set<Word> words;
-	private final Config config;
+	private final Iterator<Word> wordIterator;
+	private final Map<Integer, Set<Character>> digitCharMap;
+	private final int[] digits;
 
-	public MajorSystemSearcher(Config config, Set<Word> words) {
-		Objects.requireNonNull(config, "configuration cannot be null");
-		Objects.requireNonNull(words, "words cannot be null");
-		if (words.isEmpty()) {
-			throw new IllegalArgumentException("set of words cannot be empty");
+	private final List<RatedWord> results = new ArrayList<>();
+
+	public MajorSystemSearcher(Set<Word> words, Config config, String numberString) {
+		Objects.requireNonNull(words, "word set cannot be null");
+		Objects.requireNonNull(config, "config cannot be null");
+		Objects.requireNonNull(numberString, "number string cannot be null");
+		this.wordIterator = words.stream().filter(word -> {
+			return word.consonantLength() <= numberString.length();
+		}).iterator();
+
+		this.digitCharMap = new HashMap<>();
+		Type[] digitCharsTypes = config.getDigitCharactersTypes();
+		for (int i = 0; i < digitCharsTypes.length; i++) {
+			Set<Character> charSet = config.get(digitCharsTypes[i]);
+			digitCharMap.put(i, charSet);
 		}
-		this.words = Collections.unmodifiableSet(words);
-		this.config = new Config(config);
+
+		this.digits = new int[numberString.length()];
+		for (int i = 0; i < digits.length; i++) {
+			digits[i] = Integer.parseInt(String.valueOf(numberString.charAt(i)));
+		}
 	}
 
-	public void findResults(Consumer<String> onNewResult) {
-		Map<Word, Integer> wordPoints = new HashMap<>(words.size());
-		for (Word word : words) {
-			int points = 0;
-			points += word.consonantLength();
-			wordPoints.put(word, points);
+	public boolean isDone() {
+		return !wordIterator.hasNext();
+	}
+
+	public RatedWord nextResult() {
+		Word word = wordIterator.next();
+		int points = 0;
+
+		for (int i = 0; i < word.consonantLength(); i++) {
+			Set<Character> validChars = digitCharMap.get(digits[i]);
+			char consonant = word.getConsonant(i);
+			if (validChars.contains(consonant)) {
+				points++;
+			} else {
+				break;
+			}
 		}
 
-		for (Word word : words) {
-			onNewResult.accept(word.toString() + " - " + wordPoints.get(word));
+		if (points > 0) {
+			if (digits.length == word.consonantLength()) {
+				points += word.consonantLength();
+			}
+
+			RatedWord result = new RatedWord(word, points);
+			results.add(result);
+			return result;
+		} else {
+			return null;
 		}
 	}
 }
