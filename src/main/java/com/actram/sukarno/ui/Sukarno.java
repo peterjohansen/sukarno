@@ -1,11 +1,19 @@
 package com.actram.sukarno.ui;
 
 import java.io.IOException;
+import java.util.ArrayDeque;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.function.BiConsumer;
+import java.util.stream.Collectors;
 
+import com.actram.sukarno.MajorSystemSearcher;
+import com.actram.sukarno.RatedResult;
+import com.actram.sukarno.Word;
 import com.actram.sukarno.config.Config;
 import com.actram.sukarno.ui.interfaces.StageOwner;
 
@@ -27,7 +35,31 @@ public class Sukarno extends Application {
 
 	static Sukarno instance;
 
-	public static void main(String[] args) {
+	public static void main(String[] args) throws Exception {
+		final String NUMBER = "40491821";
+
+		Config config = new Config();
+		Set<Word> words = Word.loadAll(config, "/words.txt");
+		MajorSystemSearcher searcher = new MajorSystemSearcher(words, config, NUMBER);
+		List<RatedResult> results = new ArrayList<>();
+		while (!searcher.isDone()) {
+			searcher.nextPass(results);
+
+			// @formatterOff
+			results.stream()
+					.sorted()
+					.collect(Collectors.toCollection(ArrayDeque::new))
+					.descendingIterator()
+					.forEachRemaining(result -> {
+						System.out.println(result);
+					});
+			// @formatterOn
+			System.out.println();
+			System.out.println("size=" + results.size());
+			System.out.println();
+		}
+
+		System.exit(1);
 		Application.launch(Sukarno.class, args);
 	}
 

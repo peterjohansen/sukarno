@@ -1,15 +1,15 @@
 package com.actram.sukarno;
 
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.stream.Stream;
 
 import com.actram.sukarno.config.Config;
 import com.actram.sukarno.config.Type;
+import com.actram.sukarno.util.IntBox;
 
 /**
  * 
@@ -17,20 +17,36 @@ import com.actram.sukarno.config.Type;
  * @author Peter André Johansen
  */
 public class MajorSystemSearcher {
-	private final Set<Word> wordSet;
+
+	/**
+	 * Set of every word that should be checked and, if appropriate, used for
+	 * results.
+	 */
+	private final Set<Word> words;
+
+	/**
+	 * Maps the numbers {@code 0}-{@code 9} to a set of the valid consonant
+	 * characters for that number.
+	 */
 	private final Map<Integer, Set<Character>> digitCharMap;
 
+	/**
+	 * The digits to find matching words for.
+	 */
 	private int[] digits;
-	private int passes;
+
+	/**
+	 * Indicates that the searcher is done and cannot be used anymore.
+	 */
 	private boolean done;
 
-	private final List<RatedResult> results = new ArrayList<>();
+	private int passes;
 
 	public MajorSystemSearcher(Set<Word> words, Config config, String numberString) {
 		Objects.requireNonNull(words, "word set cannot be null");
 		Objects.requireNonNull(config, "config cannot be null");
 		Objects.requireNonNull(numberString, "number string cannot be null");
-		this.wordSet = words;
+		this.words = words;
 
 		this.digitCharMap = new HashMap<>();
 		Type[] digitCharsTypes = config.getDigitCharactersTypes();
@@ -52,40 +68,77 @@ public class MajorSystemSearcher {
 		return done;
 	}
 
-	public List<RatedResult> nextPass() {
-		wordSet.stream().filter(word -> {
+	public void nextPass(List<RatedResult> results) {
+		Objects.requireNonNull(results, "existing result list cannot be null");
+		if (done) {
+			throw new IllegalStateException("the searcher is done and cannot be used anymore");
+		}
+		
+		int changeCount;
+		if (passes == 0) {
+			changeCount = processFirstPass(results);
+		} else {
+			changeCount = processNextPass(results);
+		}
+
+		if (changeCount == 0) {
+			System.out.println("No more changes, exiting on pass " + passes + "...");
+			done = true;
+		}
+
+		passes++;
+	}
+
+	private int processFirstPass(List<RatedResult> results) {
+		IntBox changeCount = new IntBox(0);
+
+		// Filter out as many words as possible
+		Stream<Word> wordStream = words.stream().filter(word -> {
 			return word.consonantLength() <= digits.length;
-		}).forEach(word -> {
-			if (passes == 0) {
-				RatedWord ratedWord = rateWord(word, 0);
-				if (ratedWord != null) {
-					results.add(new RatedResult(ratedWord));
-				}
-			} else if (!results.isEmpty()) {
-				for (int i = 0; i < results.size(); i++) {
-					RatedResult result = results.get(i);
-					int consonantMatches = result.getTotalConsonantMatches();
-					if (consonantMatches < digits.length) {
-						RatedWord nextWord = rateWord(word, consonantMatches);
-						if (nextWord != null) {
-							results.set(i, result.addWord(nextWord));
-						}
-					} else {
-						continue;
-					}
-				}
-			} else {
-				done = true;
+		});
+
+		// Create and add a result for every word in
+		// the stream since they are the first ones
+		wordStream.forEach(word -> {
+			RatedWord ratedWord = rateWord(word, 0);
+			if (ratedWord != null) {
+				results.add(new RatedResult(ratedWord));
+				changeCount.increment();
 			}
 		});
-		passes++;
-		return Collections.unmodifiableList(results);
+
+		return changeCount.getValue();
+	}
+
+	private int processNextPass(List<RatedResult> results) {
+		IntBox changeCount = new IntBox(0);
+
+		// Filter out as many words as possible
+		Stream<Word> wordStream = words.stream().filter(word -> {
+			return word.consonantLength() <= digits.length;
+		});
+
+		// Expand existing results if valid
+		// combinations are possible
+		wordStream.forEach(word -> {
+			for (int i = 0; i < results.size(); i++) {
+				RatedResult result = results.get(i);
+				int consonantMatches = result.getTotalConsonantMatches();
+				RatedWord nextWord = rateWord(word, consonantMatches);
+				if (nextWord != null) {
+					results.set(i, result.addWord(nextWord));
+					changeCount.increment();
+				}
+			}
+		});
+
+		return changeCount.getValue();
 	}
 
 	private RatedWord rateWord(Word word, int constonantStartIndex) {
 		int points = 0;
 
-		for (int i = constonantStartIndex; i < word.consonantLength(); i++) {
+		for (int i = 0; i < word.consonantLength(); i++) {
 			Set<Character> validChars = digitCharMap.get(digits[i]);
 			char consonant = word.getConsonant(i);
 			if (validChars.contains(consonant)) {
@@ -96,14 +149,8 @@ public class MajorSystemSearcher {
 			}
 		}
 
-		if (points > 0) {
-			int consonantCount = points;
-			if (digits.length == word.consonantLength() - (constonantStartIndex)) {
-				points += word.consonantLength();
-			}
-			return new RatedWord(word, points, consonantCount);
-		}
-
-		return null;
+		int consonantCount = points;
+		// TODO Rate word based on length, etc...
+		return new RatedWord(word, points, consonantCount);
 	}
 }

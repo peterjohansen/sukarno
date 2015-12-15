@@ -1,6 +1,7 @@
 package com.actram.sukarno.ui;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
@@ -100,7 +101,7 @@ public class SearchController implements StageOwner {
 		searchProgressIndicator.setManaged(false);
 		searchProgressIndicator.setVisible(false);
 
-		numberInputField.setText("494284312");
+		numberInputField.setText("28431290200");
 	}
 
 	@Override
@@ -129,8 +130,9 @@ public class SearchController implements StageOwner {
 		Task<Void> searchTask = new Task<Void>() {
 			@Override
 			protected Void call() throws Exception {
+				List<RatedResult> results = new ArrayList<>();
 				while (searcher != null && !searcher.isDone()) {
-					List<RatedResult> results = searcher.nextPass();
+					searcher.nextPass(results);
 					Platform.runLater(() -> {
 						resultList.getItems().setAll(results);
 						Collections.sort(resultList.getItems());
