@@ -73,7 +73,7 @@ public class MajorSystemSearcher {
 		if (done) {
 			throw new IllegalStateException("the searcher is done and cannot be used anymore");
 		}
-		
+
 		int changeCount;
 		if (passes == 0) {
 			changeCount = processFirstPass(results);
@@ -101,7 +101,7 @@ public class MajorSystemSearcher {
 		// the stream since they are the first ones
 		wordStream.forEach(word -> {
 			RatedWord ratedWord = rateWord(word, 0);
-			if (ratedWord != null) {
+			if (ratedWord != null && ratedWord.getPoints() > 0) {
 				results.add(new RatedResult(ratedWord));
 				changeCount.increment();
 			}
@@ -125,7 +125,7 @@ public class MajorSystemSearcher {
 				RatedResult result = results.get(i);
 				int consonantMatches = result.getTotalConsonantMatches();
 				RatedWord nextWord = rateWord(word, consonantMatches);
-				if (nextWord != null) {
+				if (nextWord != null && nextWord.getPoints() > 0) {
 					results.set(i, result.addWord(nextWord));
 					changeCount.increment();
 				}
@@ -138,19 +138,23 @@ public class MajorSystemSearcher {
 	private RatedWord rateWord(Word word, int constonantStartIndex) {
 		int points = 0;
 
+		boolean matches = false;
 		for (int i = 0; i < word.consonantLength(); i++) {
 			Set<Character> validChars = digitCharMap.get(digits[i]);
 			char consonant = word.getConsonant(i);
 			if (validChars.contains(consonant)) {
-				points++;
+				matches = true;
 			} else {
-				points = 0;
+				matches = false;
 				break;
 			}
 		}
 
 		int consonantCount = points;
-		// TODO Rate word based on length, etc...
+		if (matches) {
+			points += word.consonantLength();
+			// TODO Rate word based on length, etc...
+		}
 		return new RatedWord(word, points, consonantCount);
 	}
 }
