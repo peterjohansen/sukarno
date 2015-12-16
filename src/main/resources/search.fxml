@@ -20,7 +20,7 @@
          <children>
             <Label alignment="CENTER_RIGHT" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" prefWidth="64.0" text="Number to memorize:" textAlignment="RIGHT" wrapText="true" />
             <TextArea fx:id="numberInputField" prefColumnCount="24" prefRowCount="1" wrapText="true" HBox.hgrow="ALWAYS" />
-            <ToggleButton fx:id="searchButton" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" mnemonicParsing="false" text="Search" HBox.hgrow="SOMETIMES" />
+            <Button fx:id="searchButton" defaultButton="true" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#search" text="Search" />
          </children>
       </HBox>
    </top>

@@ -41,6 +41,11 @@ public class MajorSystemSearcher {
 	 */
 	private boolean done;
 
+	/**
+	 * Indicates that the searcher is cancelled and cannot be used anymore.
+	 */
+	private boolean cancelled;
+
 	private int passes;
 
 	public MajorSystemSearcher(Set<Word> words, Config config, String numberString) {
@@ -65,13 +70,17 @@ public class MajorSystemSearcher {
 		this.done = false;
 	}
 
+	public void cancel() {
+		this.cancelled = true;
+	}
+
 	public boolean isCompleteResult(RatedResult result) {
 		Objects.requireNonNull(result, "result cannot be null");
 		return result.getTotalConsonantMatches() == digits.length;
 	}
 
-	public boolean isDone() {
-		return done;
+	public boolean isRunning() {
+		return (!done && !cancelled);
 	}
 
 	public void nextPass(List<RatedResult> results) {
@@ -127,7 +136,7 @@ public class MajorSystemSearcher {
 		// combinations are possible
 		List<RatedResult> newResults = new ArrayList<>(results.size());
 		wordStream.forEach(word -> {
-			for (int i = 0; i < results.size(); i++) {
+			for (int i = 0; i < results.size() && isRunning(); i++) {
 				RatedResult result = results.get(i);
 				int consonantMatches = result.getTotalConsonantMatches();
 				RatedWord nextWord = rateWord(word, consonantMatches);

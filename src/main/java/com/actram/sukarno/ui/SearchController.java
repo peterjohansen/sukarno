@@ -14,16 +14,14 @@ import com.actram.sukarno.ui.interfaces.StageOwner;
 
 import javafx.application.Platform;
 import javafx.concurrent.Task;
-import javafx.concurrent.WorkerStateEvent;
 import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
 import javafx.fxml.FXML;
+import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
 import javafx.scene.control.ProgressIndicator;
 import javafx.scene.control.TextArea;
-import javafx.scene.control.ToggleButton;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
 import javafx.util.Callback;
@@ -38,20 +36,24 @@ public class SearchController implements StageOwner {
 	private Stage stage;
 
 	@FXML private TextArea numberInputField;
-	@FXML private ToggleButton searchButton;
+	@FXML private Button searchButton;
 	@FXML private ProgressIndicator searchProgressIndicator;
 	@FXML private ListView<RatedResult> resultList;
 	@FXML private Label statusLabel;
 
-	private MajorSystemSearcher searcher;
 	private Set<Word> words;
+	private MajorSystemSearcher searcher;
 	private Task<Void> searchTask;
 
 	private void cancelSearch() {
-		if (searchTask != null && searchTask.isRunning()) {
+		if (searcher != null) {
+			searcher.cancel();
+		}
+		if (searchTask != null) {
 			searchTask.cancel();
 		}
-		searcher = null;
+		numberInputField.setDisable(false);
+		searchButton.setText("Search");
 		searchProgressIndicator.setManaged(false);
 		searchProgressIndicator.setVisible(false);
 	}
@@ -76,17 +78,7 @@ public class SearchController implements StageOwner {
 				numberInputField.setText(oldValue);
 			}
 		});
-		numberInputField.disableProperty().bind(searchButton.selectedProperty());
 
-		searchButton.selectedProperty().addListener((observable, oldValue, newValue) -> {
-			if (newValue) {
-				searchButton.setText("Cancel");
-				startSearch(numberInputField.getText());
-			} else {
-				cancelSearch();
-				searchButton.setText("Search");
-			}
-		});
 		searchButton.disableProperty().bind(numberInputField.textProperty().isEmpty());
 
 		resultList.setCellFactory(new Callback<ListView<RatedResult>, ListCell<RatedResult>>() {
@@ -112,10 +104,13 @@ public class SearchController implements StageOwner {
 
 	@FXML
 	void search(ActionEvent evt) {
-		if (!numberInputField.getText().isEmpty()) {
-			resultList.getItems().clear();
+		if (searchTask != null && searchTask.isRunning()) {
 			cancelSearch();
-			startSearch(numberInputField.getText());
+		} else {
+			if (!numberInputField.getText().isEmpty()) {
+				resultList.getItems().clear();
+				startSearch(numberInputField.getText());
+			}
 		}
 	}
 
@@ -137,16 +132,16 @@ public class SearchController implements StageOwner {
 	}
 
 	private void startSearch(String number) {
-		if (searcher != null) {
-			return;
+		if (searchTask != null && searchTask.isRunning()) {
+			throw new AssertionError("search task is still running");
 		}
-		this.searcher = new MajorSystemSearcher(words, program.getConfig(), numberInputField.getText());
+		searcher = new MajorSystemSearcher(words, program.getConfig(), numberInputField.getText());
 
-		Task<Void> searchTask = new Task<Void>() {
+		searchTask = new Task<Void>() {
 			@Override
 			protected Void call() throws Exception {
 				List<RatedResult> results = new ArrayList<>();
-				while (searcher != null && !searcher.isDone()) {
+				while (searcher.isRunning()) {
 					searcher.nextPass(results);
 					Platform.runLater(() -> {
 						resultList.getItems().clear();
@@ -159,15 +154,12 @@ public class SearchController implements StageOwner {
 						statusLabel.setText(resultList.getItems().size() + " results");
 					});
 				}
+				cancel();
 				return null;
 			}
 		};
-		EventHandler<WorkerStateEvent> searchDone = event -> {
-			cancelSearch();
-		};
-		searchTask.addEventHandler(WorkerStateEvent.WORKER_STATE_CANCELLED, searchDone);
-		searchTask.addEventHandler(WorkerStateEvent.WORKER_STATE_SUCCEEDED, searchDone);
 
+		searchButton.setText("Cancel");
 		resultList.getItems().clear();
 		new Thread(searchTask).start();
 		statusLabel.setManaged(true);
