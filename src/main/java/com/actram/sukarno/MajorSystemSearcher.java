@@ -135,7 +135,7 @@ public class MajorSystemSearcher {
 		return changeCount.getValue();
 	}
 
-	public RatedWord rateWord(Word word, int constonantStartIndex) {
+	private RatedWord rateWord(Word word, int constonantStartIndex) {
 		int matchCount = 0;
 		if (word.consonantLength() - 1 + constonantStartIndex > digits.length - 1) {
 
