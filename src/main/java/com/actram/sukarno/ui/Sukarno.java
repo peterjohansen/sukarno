@@ -48,7 +48,7 @@ public class Sukarno extends Application {
 			// @formatterOff
 			results.stream()
 					.sorted()
-					.collect(Collectors.toCollection(ArrayDeque::new))
+					.collect(Collectors.toCollection(ArrayDeque::new))	
 					.descendingIterator()
 					.forEachRemaining(result -> {
 						System.out.println(result);

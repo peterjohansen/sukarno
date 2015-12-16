@@ -101,7 +101,7 @@ public class MajorSystemSearcher {
 		// the stream since they are the first ones
 		wordStream.forEach(word -> {
 			RatedWord ratedWord = rateWord(word, 0);
-			if (ratedWord != null && ratedWord.getPoints() > 0) {
+			if (ratedWord.isMatch()) {
 				results.add(new RatedResult(ratedWord));
 				changeCount.increment();
 			}
@@ -125,7 +125,7 @@ public class MajorSystemSearcher {
 				RatedResult result = results.get(i);
 				int consonantMatches = result.getTotalConsonantMatches();
 				RatedWord nextWord = rateWord(word, consonantMatches);
-				if (nextWord != null && nextWord.getPoints() > 0) {
+				if (nextWord.isMatch()) {
 					results.set(i, result.addWord(nextWord));
 					changeCount.increment();
 				}
@@ -135,26 +135,21 @@ public class MajorSystemSearcher {
 		return changeCount.getValue();
 	}
 
-	private RatedWord rateWord(Word word, int constonantStartIndex) {
-		int points = 0;
+	public RatedWord rateWord(Word word, int constonantStartIndex) {
+		int matchCount = 0;
+		if (word.consonantLength() - 1 + constonantStartIndex > digits.length - 1) {
 
-		boolean matches = false;
-		for (int i = 0; i < word.consonantLength(); i++) {
-			Set<Character> validChars = digitCharMap.get(digits[i]);
-			char consonant = word.getConsonant(i);
-			if (validChars.contains(consonant)) {
-				matches = true;
-			} else {
-				matches = false;
-				break;
+		} else {
+			for (int i = 0; i < word.consonantLength(); i++) {
+				Set<Character> validChars = digitCharMap.get(digits[i + constonantStartIndex]);
+				if (validChars.contains(word.getConsonant(i))) {
+					matchCount++;
+				} else {
+					matchCount = 0;
+					break;
+				}
 			}
 		}
-
-		int consonantCount = points;
-		if (matches) {
-			points += word.consonantLength();
-			// TODO Rate word based on length, etc...
-		}
-		return new RatedWord(word, points, consonantCount);
+		return new RatedWord(word, matchCount != 0);
 	}
 }

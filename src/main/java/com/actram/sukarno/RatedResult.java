@@ -12,16 +12,27 @@ import java.util.function.Consumer;
  */
 public class RatedResult implements Comparable<RatedResult> {
 	private final List<RatedWord> ratedWords;
+	private final int points;
 
 	private RatedResult(List<RatedWord> existingRatedWords, RatedWord word) {
 		Objects.requireNonNull(existingRatedWords, "rated word list cannot be null");
 		Objects.requireNonNull(word, "word cannot be null");
+		if (!word.isMatch()) {
+			throw new IllegalArgumentException("cannot create a result with a non-matching word");
+		}
 
 		this.ratedWords = new ArrayList<>(existingRatedWords.size() + 1);
 		ratedWords.addAll(existingRatedWords);
 		if (word != null) {
 			ratedWords.add(word);
 		}
+		
+		int points = 0;
+		for (RatedWord ratedWord : ratedWords) {
+			points += ratedWord.getWord().consonantLength();
+		}
+		points -= ratedWords.size();
+		this.points = points;
 	}
 
 	public RatedResult(RatedWord word) {
@@ -50,18 +61,14 @@ public class RatedResult implements Comparable<RatedResult> {
 
 	public int getTotalConsonantMatches() {
 		int sum = 0;
-		for (RatedWord word : ratedWords) {
-			sum += word.getConsonantMatches();
+		for (RatedWord ratedWord : ratedWords) {
+			sum += ratedWord.getWord().consonantLength();
 		}
 		return sum;
 	}
 
 	public int getTotalPoints() {
-		int sum = 0;
-		for (RatedWord word : ratedWords) {
-			sum += word.getPoints();
-		}
-		return sum;
+		return points;
 	}
 
 	@Override
