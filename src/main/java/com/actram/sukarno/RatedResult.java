@@ -13,6 +13,7 @@ import java.util.function.Consumer;
 public class RatedResult implements Comparable<RatedResult> {
 	private final List<RatedWord> ratedWords;
 	private final int points;
+	private final int consonantMatches;
 
 	private RatedResult(List<RatedWord> existingRatedWords, RatedWord word) {
 		Objects.requireNonNull(existingRatedWords, "rated word list cannot be null");
@@ -26,13 +27,15 @@ public class RatedResult implements Comparable<RatedResult> {
 		if (word != null) {
 			ratedWords.add(word);
 		}
-		
+
 		int points = 0;
 		for (RatedWord ratedWord : ratedWords) {
 			points += ratedWord.getWord().consonantLength();
 		}
+		this.consonantMatches = points;
 		points -= ratedWords.size();
 		this.points = points;
+
 	}
 
 	public RatedResult(RatedWord word) {
@@ -60,11 +63,7 @@ public class RatedResult implements Comparable<RatedResult> {
 	}
 
 	public int getTotalConsonantMatches() {
-		int sum = 0;
-		for (RatedWord ratedWord : ratedWords) {
-			sum += ratedWord.getWord().consonantLength();
-		}
-		return sum;
+		return consonantMatches;
 	}
 
 	public int getTotalPoints() {
@@ -73,6 +72,10 @@ public class RatedResult implements Comparable<RatedResult> {
 
 	@Override
 	public String toString() {
+		return toString(true);
+	}
+	
+	public String toString(boolean showPoints) {
 		StringBuilder builder = new StringBuilder();
 		for (RatedWord word : ratedWords) {
 			if (builder.length() != 0) {
@@ -80,7 +83,9 @@ public class RatedResult implements Comparable<RatedResult> {
 			}
 			builder.append(word.getWord().getContent());
 		}
-		builder.append(" (" + getTotalPoints() + ")");
+		if (showPoints) {
+			builder.append(" (" + getTotalPoints() + ")");
+		}
 		return builder.toString();
 	}
 }

@@ -23,6 +23,7 @@ import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
 import javafx.scene.control.ProgressIndicator;
 import javafx.scene.control.TextArea;
+import javafx.scene.control.ToggleButton;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
 import javafx.util.Callback;
@@ -37,6 +38,7 @@ public class SearchController implements StageOwner {
 	private Stage stage;
 
 	@FXML private TextArea numberInputField;
+	@FXML private ToggleButton searchButton;
 	@FXML private ProgressIndicator searchProgressIndicator;
 	@FXML private ListView<RatedResult> resultList;
 	@FXML private Label statusLabel;
@@ -72,14 +74,20 @@ public class SearchController implements StageOwner {
 		numberInputField.textProperty().addListener((observable, oldValue, newValue) -> {
 			if (!newValue.matches("\\d*") && !newValue.equals(oldValue)) {
 				numberInputField.setText(oldValue);
-			} else if (!newValue.isEmpty()) {
-				cancelSearch();
-				startSearch(newValue);
-			} else {
-				cancelSearch();
-				resultList.getItems().clear();
 			}
 		});
+		numberInputField.disableProperty().bind(searchButton.selectedProperty());
+
+		searchButton.selectedProperty().addListener((observable, oldValue, newValue) -> {
+			if (newValue) {
+				searchButton.setText("Cancel");
+				startSearch(numberInputField.getText());
+			} else {
+				cancelSearch();
+				searchButton.setText("Search");
+			}
+		});
+		searchButton.disableProperty().bind(numberInputField.textProperty().isEmpty());
 
 		resultList.setCellFactory(new Callback<ListView<RatedResult>, ListCell<RatedResult>>() {
 			@Override
@@ -89,7 +97,7 @@ public class SearchController implements StageOwner {
 					protected void updateItem(RatedResult item, boolean empty) {
 						super.updateItem(item, empty);
 						if (item != null) {
-							setText(item.toString());
+							setText(item.toString(false));
 						}
 					}
 				};
@@ -100,8 +108,15 @@ public class SearchController implements StageOwner {
 		statusLabel.setVisible(false);
 		searchProgressIndicator.setManaged(false);
 		searchProgressIndicator.setVisible(false);
+	}
 
-		numberInputField.setText("28431290200");
+	@FXML
+	void search(ActionEvent evt) {
+		if (!numberInputField.getText().isEmpty()) {
+			resultList.getItems().clear();
+			cancelSearch();
+			startSearch(numberInputField.getText());
+		}
 	}
 
 	@Override
@@ -134,7 +149,12 @@ public class SearchController implements StageOwner {
 				while (searcher != null && !searcher.isDone()) {
 					searcher.nextPass(results);
 					Platform.runLater(() -> {
-						resultList.getItems().setAll(results);
+						resultList.getItems().clear();
+						results.stream().filter(result -> {
+							return searcher.isCompleteResult(result);
+						}).forEach(result -> {
+							resultList.getItems().add(result);
+						});
 						Collections.sort(resultList.getItems());
 						statusLabel.setText(resultList.getItems().size() + " results");
 					});

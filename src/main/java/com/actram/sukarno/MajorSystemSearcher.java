@@ -1,5 +1,6 @@
 package com.actram.sukarno;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -64,6 +65,11 @@ public class MajorSystemSearcher {
 		this.done = false;
 	}
 
+	public boolean isCompleteResult(RatedResult result) {
+		Objects.requireNonNull(result, "result cannot be null");
+		return result.getTotalConsonantMatches() == digits.length;
+	}
+
 	public boolean isDone() {
 		return done;
 	}
@@ -82,7 +88,6 @@ public class MajorSystemSearcher {
 		}
 
 		if (changeCount == 0) {
-			System.out.println("No more changes, exiting on pass " + passes + "...");
 			done = true;
 		}
 
@@ -120,17 +125,20 @@ public class MajorSystemSearcher {
 
 		// Expand existing results if valid
 		// combinations are possible
+		List<RatedResult> newResults = new ArrayList<>(results.size());
 		wordStream.forEach(word -> {
 			for (int i = 0; i < results.size(); i++) {
 				RatedResult result = results.get(i);
 				int consonantMatches = result.getTotalConsonantMatches();
 				RatedWord nextWord = rateWord(word, consonantMatches);
 				if (nextWord.isMatch()) {
-					results.set(i, result.addWord(nextWord));
+					newResults.add(result.addWord(nextWord));
 					changeCount.increment();
 				}
 			}
 		});
+		results.addAll(newResults);
+		results.removeIf(result -> result.getTotalPoints() == 0);
 
 		return changeCount.getValue();
 	}
